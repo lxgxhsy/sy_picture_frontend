@@ -88,6 +88,7 @@ const searchParams = reactive<API.PictureQueryRequest>({
 const fetchData = async () => {
   loading.value = true
   // 转换搜索参数
+  //将标签转换为json数组  也就是 List<String> tagsList;
   const params = {
     ...searchParams,
     tags: [] as string[],

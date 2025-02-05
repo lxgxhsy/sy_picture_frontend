@@ -1,5 +1,15 @@
 <template>
   <div id="pictureManagePage">
+    <a-flex justify="space-between">
+      <h2>图片管理</h2>
+      <a-space>
+        <a-button type="primary" href="/add_picture" target="_blank">+ 创建图片</a-button>
+        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost
+          >+ 批量创建图片</a-button
+        >
+      </a-space>
+    </a-flex>
+    <div style="margin-bottom: 16px" />
     <!-- 搜索表单 -->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="关键词">
@@ -21,6 +31,16 @@
           allow-clear
         />
       </a-form-item>
+      <a-form-item label="审核状态" name="reviewStatus">
+        <a-select
+          v-model:value="searchParams.reviewStatus"
+          :options="PIC_REVIEW_STATUS_OPTIONS"
+          placeholder="请输入审核状态"
+          style="min-width: 180px"
+          allow-clear
+        />
+      </a-form-item>
+
       <a-form-item>
         <a-button type="primary" html-type="submit">搜索</a-button>
       </a-form-item>
@@ -38,7 +58,7 @@
           <a-image :src="record.url" :width="120" />
         </template>
         <template v-if="column.dataIndex === 'tags'">
-          <a-space wrap>
+          <a-space>
             <a-tag v-for="tag in JSON.parse(record.tags || '[]')" :key="tag">
               {{ tag }}
             </a-tag>
@@ -51,6 +71,14 @@
           <div>宽高比：{{ record.picScale }}</div>
           <div>大小：{{ (record.picSize / 1024).toFixed(2) }}KB</div>
         </template>
+        <template v-if="column.dataIndex === 'reviewMessage'">
+          <div>审核状态：{{ PIC_REVIEW_STATUS_MAP[record.reviewStatus] }}</div>
+          <div>审核信息：{{ record.reviewMessage }}</div>
+          <div>审核人：{{ record.reviewerId }}</div>
+          <div v-if="record.reviewTime">
+            审核时间：{{ dayjs(record.reviewTime).format('YYYY-MM-DD HH:mm:ss') }}
+          </div>
+        </template>
         <template v-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
@@ -58,7 +86,19 @@
           {{ dayjs(record.editTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
         <template v-else-if="column.key === 'action'">
-          <a-space>
+          <a-space wrap>
+            <a-button
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)"
+            >
+              通过
+            </a-button>
+            <a-button
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
+              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
+            >
+              通过
+            </a-button>
             <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">
               编辑
             </a-button>
@@ -74,7 +114,16 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { deleteUserUsingPost, listUserVoByPageUsingPost } from '@/api/userController.ts'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import { deletePictureUsingPost, listPictureByPageUsingPost } from '@/api/pictureController'
+import {
+  deletePictureUsingPost,
+  doPictureReviewUsingPost,
+  listPictureByPageUsingPost,
+} from '@/api/pictureController'
+import {
+  PIC_REVIEW_STATUS_ENUM,
+  PIC_REVIEW_STATUS_MAP,
+  PIC_REVIEW_STATUS_OPTIONS,
+} from '../../constants/picture.ts'
 
 const columns = [
   {
@@ -113,6 +162,10 @@ const columns = [
     width: 80,
   },
   {
+    title: '审核信息',
+    dataIndex: 'reviewMessage',
+  },
+  {
     title: '创建时间',
     dataIndex: 'createTime',
   },
@@ -148,6 +201,23 @@ const fetchData = async () => {
     total.value = res.data.data.total ?? 0
   } else {
     message.error('获取数据失败，' + res.data.message)
+  }
+}
+
+const handleReview = async (record: API.Picture, reviewStatus: number) => {
+  const reviewMessage =
+    reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作拒绝'
+  const res = await doPictureReviewUsingPost({
+    id: record.id,
+    reviewStatus,
+    reviewMessage,
+  })
+  if (res.data.code === 200) {
+    message.success('审核成功')
+    // 重新获取列表
+    fetchData()
+  } else {
+    message.error('审核操作失败，' + res.data.message)
   }
 }
 

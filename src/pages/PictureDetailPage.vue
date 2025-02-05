@@ -82,6 +82,7 @@ const props = defineProps<Props>()
 const picture = ref<API.PictureVO>({})
 const loginUserStore = useLoginUserStore()
 // 是否具有编辑权限
+//计算属性 因为这个用户状态可能会变 所以需要computed
 const canEdit = computed(() => {
   const loginUser = loginUserStore.loginUser
   // 未登录不可编辑
