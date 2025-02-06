@@ -363,7 +363,7 @@ declare namespace API {
     id?: number
     introduction?: string
     name?: string
-    tags?: string
+    tags?: string[]
   }
 
   type PictureQueryRequest = {
@@ -441,6 +441,7 @@ declare namespace API {
     picWidth?: number
     spaceId?: number
     tags?: string[]
+    thumbnailUrl?: string
     updateTime?: string
     url?: string
     user?: UserVO
