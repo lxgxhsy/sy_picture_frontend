@@ -1,46 +1,29 @@
 <template>
   <div id="spaceManagePage">
     <a-flex justify="space-between">
-      <h2>图片管理</h2>
+      <h2>空间管理</h2>
       <a-space>
-        <a-button type="primary" href="/add_picture" target="_blank">+ 创建图片</a-button>
-        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost
-          >+ 批量创建图片</a-button
-        >
+        <a-button type="primary" href="/add_space" target="_blank">+ 创建空间</a-button>
       </a-space>
     </a-flex>
     <div style="margin-bottom: 16px" />
     <!-- 搜索表单 -->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
-      <a-form-item label="关键词">
-        <a-input
-          v-model:value="searchParams.searchText"
-          placeholder="从名称和简介搜索"
-          allow-clear
-        />
+      <a-form-item label="空间名称">
+        <a-input v-model:value="searchParams.spaceName" placeholder="请输入空间名称" allow-clear />
       </a-form-item>
-      <a-form-item label="类型">
-        <a-input v-model:value="searchParams.category" placeholder="请输入类型" allow-clear />
-      </a-form-item>
-      <a-form-item label="标签">
+      <a-form-item label="空间级别">
         <a-select
-          v-model:value="searchParams.tags"
-          mode="tags"
-          placeholder="请输入标签"
+          v-model:value="searchParams.spaceLevel"
           style="min-width: 180px"
+          placeholder="请选择空间级别"
+          :options="SPACE_LEVEL_OPTIONS"
           allow-clear
         />
       </a-form-item>
-      <a-form-item label="审核状态" name="reviewStatus">
-        <a-select
-          v-model:value="searchParams.reviewStatus"
-          :options="PIC_REVIEW_STATUS_OPTIONS"
-          placeholder="请输入审核状态"
-          style="min-width: 180px"
-          allow-clear
-        />
+      <a-form-item label="用户id">
+        <a-input v-model:value="searchParams.userId" placeholder="请输入用户 id" allow-clear />
       </a-form-item>
-
       <a-form-item>
         <a-button type="primary" html-type="submit">搜索</a-button>
       </a-form-item>
@@ -54,30 +37,12 @@
       @change="doTableChange"
     >
       <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'url'">
-          <a-image :src="record.url" :width="120" />
+        <template v-if="column.dataIndex === 'spaceLevel'">
+          <div>{{ SPACE_LEVEL_MAP[record.spaceLevel] }}</div>
         </template>
-        <template v-if="column.dataIndex === 'tags'">
-          <a-space>
-            <a-tag v-for="tag in JSON.parse(record.tags || '[]')" :key="tag">
-              {{ tag }}
-            </a-tag>
-          </a-space>
-        </template>
-        <template v-if="column.dataIndex === 'picInfo'">
-          <div>格式：{{ record.picFormat }}</div>
-          <div>宽度：{{ record.picWidth }}</div>
-          <div>高度：{{ record.picHeight }}</div>
-          <div>宽高比：{{ record.picScale }}</div>
-          <div>大小：{{ (record.picSize / 1024).toFixed(2) }}KB</div>
-        </template>
-        <template v-if="column.dataIndex === 'reviewMessage'">
-          <div>审核状态：{{ PIC_REVIEW_STATUS_MAP[record.reviewStatus] }}</div>
-          <div>审核信息：{{ record.reviewMessage }}</div>
-          <div>审核人：{{ record.reviewerId }}</div>
-          <div v-if="record.reviewTime">
-            审核时间：{{ dayjs(record.reviewTime).format('YYYY-MM-DD HH:mm:ss') }}
-          </div>
+        <template v-if="column.dataIndex === 'spaceUseInfo'">
+          <div>大小：{{ formatSize(record.totalSize) }} / {{ formatSize(record.maxSize) }}</div>
+          <div>数量：{{ record.totalCount }} / {{ record.maxCount }}</div>
         </template>
         <template v-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
@@ -87,19 +52,7 @@
         </template>
         <template v-else-if="column.key === 'action'">
           <a-space wrap>
-            <a-button
-              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
-              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)"
-            >
-              通过
-            </a-button>
-            <a-button
-              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
-              @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
-            >
-              通过
-            </a-button>
-            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">
+            <a-button type="link" :href="`/add_space?id=${record.id}`" target="_blank">
               编辑
             </a-button>
             <a-button danger @click="doDelete(record.id)">删除</a-button>
@@ -111,19 +64,11 @@
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deleteUserUsingPost, listUserVoByPageUsingPost } from '@/api/userController.ts'
+import { deleteSpaceUsingPost, listSpaceByPageUsingPost } from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import {
-  deletePictureUsingPost,
-  doPictureReviewUsingPost,
-  listPictureByPageUsingPost,
-} from '@/api/pictureController'
-import {
-  PIC_REVIEW_STATUS_ENUM,
-  PIC_REVIEW_STATUS_MAP,
-  PIC_REVIEW_STATUS_OPTIONS,
-} from '../../constants/picture.ts'
+import { SPACE_LEVEL_MAP, SPACE_LEVEL_OPTIONS } from '../../constants/space.ts'
+import { formatSize } from '../../utils'
 
 const columns = [
   {
@@ -132,38 +77,21 @@ const columns = [
     width: 80,
   },
   {
-    title: '图片',
-    dataIndex: 'url',
+    title: '空间名称',
+    dataIndex: 'spaceName',
   },
   {
-    title: '名称',
-    dataIndex: 'name',
+    title: '空间级别',
+    dataIndex: 'spaceLevel',
   },
   {
-    title: '简介',
-    dataIndex: 'introduction',
-    ellipsis: true,
-  },
-  {
-    title: '类型',
-    dataIndex: 'category',
-  },
-  {
-    title: '标签',
-    dataIndex: 'tags',
-  },
-  {
-    title: '图片信息',
-    dataIndex: 'picInfo',
+    title: '使用情况',
+    dataIndex: 'spaceUseInfo',
   },
   {
     title: '用户 id',
     dataIndex: 'userId',
     width: 80,
-  },
-  {
-    title: '审核信息',
-    dataIndex: 'reviewMessage',
   },
   {
     title: '创建时间',
@@ -180,11 +108,11 @@ const columns = [
 ]
 
 // 定义数据
-const dataList = ref<API.Picture[]>([])
+const dataList = ref([])
 const total = ref(0)
 
 // 搜索条件
-const searchParams = reactive<API.PictureQueryRequest>({
+const searchParams = reactive<API.SpaceQueryRequest>({
   current: 1,
   pageSize: 10,
   sortField: 'createTime',
@@ -193,7 +121,7 @@ const searchParams = reactive<API.PictureQueryRequest>({
 
 // 获取数据
 const fetchData = async () => {
-  const res = await listPictureByPageUsingPost({
+  const res = await listSpaceByPageUsingPost({
     ...searchParams,
   })
   if (res.data.code === 200 && res.data.data) {
@@ -201,23 +129,6 @@ const fetchData = async () => {
     total.value = res.data.data.total ?? 0
   } else {
     message.error('获取数据失败，' + res.data.message)
-  }
-}
-
-const handleReview = async (record: API.Picture, reviewStatus: number) => {
-  const reviewMessage =
-    reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员操作通过' : '管理员操作拒绝'
-  const res = await doPictureReviewUsingPost({
-    id: record.id,
-    reviewStatus,
-    reviewMessage,
-  })
-  if (res.data.code === 200) {
-    message.success('审核成功')
-    // 重新获取列表
-    fetchData()
-  } else {
-    message.error('审核操作失败，' + res.data.message)
   }
 }
 
@@ -229,8 +140,8 @@ onMounted(() => {
 // 分页参数
 const pagination = computed(() => {
   return {
-    current: searchParams.current,
-    pageSize: searchParams.pageSize,
+    current: searchParams.current ?? 1,
+    pageSize: searchParams.pageSize ?? 10,
     total: total.value,
     showSizeChanger: true,
     showTotal: (total) => `共 ${total} 条`,
@@ -256,7 +167,7 @@ const doDelete = async (id: string) => {
   if (!id) {
     return
   }
-  const res = await deletePictureUsingPost({ id })
+  const res = await deleteSpaceUsingPost({ id })
   if (res.data.code === 200) {
     message.success('删除成功')
     // 刷新数据

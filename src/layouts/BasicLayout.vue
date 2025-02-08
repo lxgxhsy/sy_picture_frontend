@@ -2,9 +2,12 @@
   <div id="basicLayout">
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header"><GlobalHeader /></a-layout-header>
-      <a-layout-content class="content">
-        <router-view />
-      </a-layout-content>
+      <a-layout>
+        <GlobalSider class="sider" />
+        <a-layout-content class="content">
+          <router-view />
+        </a-layout-content>
+      </a-layout>
       <a-layout-footer class="footer">
         <a href="https://www.codefather.cns" target="_blank"> 编程小将 by 程序员sy </a>
       </a-layout-footer>
@@ -14,7 +17,7 @@
 
 <script setup lang="ts">
 import GlobalHeader from '@/components/GlobalHeader.vue'
-import TheWelcome from '../components/TheWelcome.vue'
+import GlobalSider from '@/components/GlobalSider.vue'
 </script>
 
 <style scoped>
@@ -22,11 +25,20 @@ import TheWelcome from '../components/TheWelcome.vue'
   color: unset;
   background: white;
   padding-inline: 20px;
-  margin-bottom: 16px;
+  margin-bottom: 1px;
+}
+#basicLayout :deep(.ant-menu-root) {
+  border-bottom: none !important;
+  border-inline-end: none !important;
+}
+#basicLayout .sider {
+  background: #fff;
+  border-right: 0.5px solid #eee;
+  padding-top: 20px;
 }
 
 #basicLayout .content {
-  padding: 20px;
+  padding: 28px;
   background: linear-gradient(to right, #fefefe, #fff);
   margin-bottom: 28px;
 }
