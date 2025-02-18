@@ -5,7 +5,7 @@ import request from '@/request'
 /** getSpaceCategoryAnalyze POST /api/space/analyze/category */
 export async function getSpaceCategoryAnalyzeUsingPost(
   body: API.SpaceCategoryAnalyzeRequest,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseListSpaceCategoryAnalyzeResponse_>('/api/space/analyze/category', {
     method: 'POST',
@@ -20,7 +20,7 @@ export async function getSpaceCategoryAnalyzeUsingPost(
 /** getSpaceRankAnalyze POST /api/space/analyze/rank */
 export async function getSpaceRankAnalyzeUsingPost(
   body: API.SpaceRankAnalyzeRequest,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseListSpace_>('/api/space/analyze/rank', {
     method: 'POST',
@@ -35,7 +35,7 @@ export async function getSpaceRankAnalyzeUsingPost(
 /** getSpaceSizeAnalyze POST /api/space/analyze/size */
 export async function getSpaceSizeAnalyzeUsingPost(
   body: API.SpaceSizeAnalyzeRequest,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseListSpaceSizeAnalyzeResponse_>('/api/space/analyze/size', {
     method: 'POST',
@@ -50,7 +50,7 @@ export async function getSpaceSizeAnalyzeUsingPost(
 /** getSpaceTagAnalyze POST /api/space/analyze/tag */
 export async function getSpaceTagAnalyzeUsingPost(
   body: API.SpaceTagAnalyzeRequest,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseListSpaceTagAnalyzeResponse_>('/api/space/analyze/tag', {
     method: 'POST',
@@ -65,7 +65,7 @@ export async function getSpaceTagAnalyzeUsingPost(
 /** getSpaceUsageAnalyze POST /api/space/analyze/usage */
 export async function getSpaceUsageAnalyzeUsingPost(
   body: API.SpaceUsageAnalyzeRequest,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseSpaceUsageAnalyzeResponse_>('/api/space/analyze/usage', {
     method: 'POST',
@@ -80,7 +80,7 @@ export async function getSpaceUsageAnalyzeUsingPost(
 /** getSpaceUserAnalyze POST /api/space/analyze/user */
 export async function getSpaceUserAnalyzeUsingPost(
   body: API.SpaceUserAnalyzeRequest,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseListSpaceUserAnalyzeResponse_>('/api/space/analyze/user', {
     method: 'POST',
