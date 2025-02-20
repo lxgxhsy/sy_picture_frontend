@@ -45,10 +45,10 @@
         <a-input v-model:value="searchParams.introduction" placeholder="请输入简介" allow-clear />
       </a-form-item>
       <a-form-item label="宽度" name="picWidth">
-        <a-input-number v-model:value="searchParams.picWidth" />
+        <a-input-number :step="5" v-model:value="searchParams.picWidth" />
       </a-form-item>
       <a-form-item label="高度" name="picHeight">
-        <a-input-number v-model:value="searchParams.picHeight" />
+        <a-input-number :step="5" v-model:value="searchParams.picHeight" />
       </a-form-item>
       <a-form-item label="格式" name="picFormat">
         <a-input v-model:value="searchParams.picFormat" placeholder="请输入格式" allow-clear />
