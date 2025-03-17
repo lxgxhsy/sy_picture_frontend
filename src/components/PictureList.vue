@@ -68,9 +68,9 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   dataList: () => [],
   loading: false,
-  showOp: true,
-  canEdit: true,
-  canDelete: true,
+  showOp: false,
+  canEdit: false,
+  canDelete: false,
 })
 
 const router = useRouter()
