@@ -32,14 +32,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
-import {
-  getPictureVoByIdUsingGet,
-  listPictureTagCategoryUsingGet,
-  uploadPictureByBatchUsingPost,
-} from '@/api/pictureController.ts'
-import { useRoute, useRouter } from 'vue-router'
+import { uploadPictureByBatchUsingPost } from '@/api/pictureController.ts'
+import { useRouter } from 'vue-router'
 // 由于批量抓取任务是同步的，可能比较慢，所以需要添加 loading 效果，
 //防止点击过快重复执行。
 const formData = reactive<API.PictureUploadByBatchRequest>({
